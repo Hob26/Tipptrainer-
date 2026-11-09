@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tipp-Trainer – Die Grundreihe</title>
+<link href="https://fonts.googleapis.com/css2?family=Luckiest+Guy&family=Patrick+Hand&family=Roboto+Mono:wght@500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<style>
+:root{--ink:#222;--yellow:#F9C23C;--yellow2:#FFE38A;--orange:#F28C28;--teal:#2bb3c0;--paper:#fffdf7;
+ --kl:#ff8fab;--rl:#ffb86b;--ml:#ffe066;--zl:#8ce99a;--zr:#74c0fc;--mr:#b197fc;--rr:#f783ac;--kr:#ffa94d;--dm:#ced4da;}
+*{box-sizing:border-box}
+body{margin:0;background:#f3efe4;font-family:'Patrick Hand','Comic Sans MS',cursive;color:var(--ink);font-size:22px}
+.wrap{max-width:1100px;margin:0 auto;padding:18px}
+h1{font-family:'Luckiest Guy',cursive;font-weight:normal;color:var(--yellow);-webkit-text-stroke:2.5px var(--ink);paint-order:stroke fill;text-shadow:3px 3px 0 var(--ink);font-size:52px;margin:6px 0;letter-spacing:1px}
+h2{font-family:'Luckiest Guy';font-weight:normal;font-size:32px;margin:4px 0 10px;letter-spacing:1px}
+.card{background:var(--paper);border:3px solid var(--ink);border-radius:14px;padding:18px 22px;margin:14px 0;box-shadow:4px 4px 0 var(--ink)}
+button{font-family:'Patrick Hand',cursive;font-size:22px;background:var(--yellow);border:2.5px solid var(--ink);border-radius:10px;padding:5px 18px;cursor:pointer;box-shadow:3px 3px 0 var(--ink)}
+button:hover{background:var(--yellow2)}
+button:active{transform:translate(3px,3px);box-shadow:none}
+button.light{background:#fff}
+input{font-family:'Patrick Hand';font-size:24px;padding:4px 10px;border:2.5px solid var(--ink);border-radius:8px;width:240px}
+.hidden{display:none!important}
+.lesson.test{background:#ffe3e3;border-color:#c92a2a}
+.lesson.test .nr{color:#c92a2a}
+.abgabe{background:#8ce99a}
+.testinfo li{margin:4px 0;font-size:24px}
+.top{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px}
+.who{font-size:22px}
+/* lesson menu */
+.lessons{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:14px}
+.lesson{background:#fff;border:2.5px solid var(--ink);border-radius:12px;padding:10px 12px;cursor:pointer;position:relative;transition:transform .1s}
+.lesson:hover{transform:translateY(-3px);background:#fffbe8}
+.lesson .nr{font-family:'Luckiest Guy';font-size:20px;color:var(--orange)}
+.lesson .keys{font-family:'Roboto Mono';font-size:28px;margin:2px 0}
+.lesson .t{font-size:20px;line-height:1.1}
+.lesson .stars{position:absolute;right:10px;top:8px;font-size:20px;letter-spacing:-2px}
+.lesson .emo{position:absolute;right:10px;bottom:6px;font-size:34px}
+/* story */
+.story{display:flex;gap:22px;align-items:flex-start}
+.story .big{font-size:96px;line-height:1}
+.story p{margin:6px 0;font-size:25px;line-height:1.35}
+.merk{background:var(--yellow2);border:2px dashed var(--ink);border-radius:10px;padding:6px 12px;display:inline-block;margin-top:6px}
+/* typing */
+.textline{font-family:'Roboto Mono',monospace;font-size:46px;letter-spacing:2px;background:#fff;border:3px solid var(--ink);border-radius:12px;padding:22px 20px;min-height:110px;white-space:pre-wrap;word-break:break-all}
+.ch{position:relative;border-radius:4px;padding:0 1px}
+.ch.done{color:#2f9e44}
+.ch.err{color:#e03131;background:#ffe3e3}
+.ch.cur{background:var(--yellow);box-shadow:0 4px 0 var(--ink)}
+.ch.cur.space{background:var(--yellow)}
+.ch.todo{color:#888}
+.status{display:flex;justify-content:space-between;align-items:center;margin:10px 4px;font-size:22px}
+.dots span{display:inline-block;width:18px;height:18px;border-radius:50%;border:2px solid var(--ink);margin-right:5px;background:#fff}
+.dots span.ok{background:#8ce99a}.dots span.now{background:var(--yellow)}
+.finger{font-size:24px;padding:4px 12px;border-radius:10px;border:2px solid var(--ink)}
+.shake{animation:shake .25s}
+@keyframes shake{25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+/* keyboard */
+.kb{background:#e9ecef;border:3px solid var(--ink);border-radius:14px;padding:12px;margin-top:12px;user-select:none}
+.row{display:flex;gap:6px;margin:6px 0}
+.key{height:54px;min-width:54px;flex:0 0 54px;border:2px solid var(--ink);border-radius:8px;display:flex;align-items:center;justify-content:center;font-family:'Roboto Mono';font-size:22px;background:#fff;position:relative;opacity:.55}
+.key.active{opacity:1}
+.key.bump::after{content:"";position:absolute;bottom:8px;width:14px;height:3px;background:var(--ink);border-radius:2px}
+.key.next{outline:4px solid var(--ink);transform:scale(1.12);z-index:2;opacity:1;animation:pulse 1s infinite}
+@keyframes pulse{50%{box-shadow:0 0 0 6px rgba(242,140,40,.6)}}
+.key.press{transform:scale(.92)}
+.legendf{display:flex;flex-wrap:wrap;gap:8px;font-size:17px;margin-top:6px;justify-content:center}
+.legendf span{border:1.5px solid var(--ink);border-radius:6px;padding:0 6px}
+/* result */
+.res{display:flex;gap:16px;flex-wrap:wrap;margin:10px 0}
+.res div{background:#fff;border:2.5px solid var(--ink);border-radius:12px;padding:8px 18px;text-align:center;min-width:190px}
+.res b{display:block;font-family:'Luckiest Guy';font-size:40px;font-weight:normal}
+.bigstars{font-size:60px;letter-spacing:4px}
+table{border-collapse:collapse;width:100%;font-size:21px;background:#fff}
+td,th{border:2px solid var(--ink);padding:4px 10px;text-align:left}
+th{background:var(--yellow2)}
+.msg{font-size:20px;color:#555}
+@media print{
+ body{background:#fff}.noprint{display:none!important}
+ #printArea{display:block!important}
+}
+#printArea{display:none}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+ <div class="top noprint">
+  <h1>TIPP-TRAINER</h1>
+  <div class="who" id="who"></div>
+ </div>
+
+ <!-- START -->
+ <section id="vStart" class="card noprint">
+  <h2>Hallo! Wer tippt heute?</h2>
+  <p>Name: <input id="inName" autocomplete="off"> &nbsp; Klasse: <input id="inKlasse" style="width:100px" autocomplete="off"></p>
+  <button id="btnStart">Los geht's ▶</button>
+  <p class="msg">Tipp: Setz dich gerade hin, beide Füße auf den Boden, Handgelenke locker. Die Augen schauen auf den Bildschirm – nicht auf die Tastatur!</p>
+ </section>
+
+ <!-- MENU -->
+ <section id="vMenu" class="hidden noprint">
+  <div class="card">
+   <div class="top"><h2>Wähle eine Lektion</h2>
+    <div><button class="light" id="btnChange">Name ändern</button> <button id="btnPdf">📄 Ergebnis als PDF</button> <button class="abgabe" id="btnAbgabe">📤 Abgeben</button></div></div>
+   <div class="lessons" id="lessonList"></div>
+   <p class="msg" id="pdfMsg"></p>
+   <p class="msg">📤 <b>Abgeben</b> speichert eine kleine Ergebnis-Datei. Lege sie in den Abgabe-Ordner deiner Klasse auf dem Schulserver.</p>
+  </div>
+ </section>
+
+ <!-- STORY -->
+ <section id="vStory" class="card hidden noprint">
+  <div class="top"><h2 id="stTitle"></h2><button class="light" id="btnBack1">◀ Übersicht</button></div>
+  <div class="story"><div class="big" id="stEmo"></div><div><div id="stText"></div><div class="merk" id="stMerk"></div><ul class="testinfo hidden" id="stTest"></ul></div></div>
+  <div class="kb" id="kbStory"></div>
+  <p style="text-align:center;margin:14px 0 0"><button id="btnGo">Ich bin bereit! (Enter)</button></p>
+ </section>
+
+ <!-- TYPING -->
+ <section id="vType" class="card hidden noprint">
+  <div class="top"><h2 id="tyTitle"></h2><button class="light" id="btnBack2">◀ Übersicht</button></div>
+  <div class="textline" id="line"></div>
+  <div class="status"><div class="dots" id="dots"></div><div class="finger" id="finger"></div><div id="live"></div></div>
+  <div class="kb" id="kb"></div>
+  <div class="legendf" id="legend"></div>
+ </section>
+
+ <!-- RESULT -->
+ <section id="vResult" class="card hidden noprint">
+  <h2 id="reTitle"></h2>
+  <div class="bigstars" id="reStars"></div>
+  <div class="res">
+   <div>Anschläge pro Minute<b id="reApm"></b></div>
+   <div>Genauigkeit<b id="reAcc"></b></div>
+   <div>Fehler<b id="reErr"></b></div>
+   <div>Zeit<b id="reTime"></b></div>
+  </div>
+  <p id="reMsg"></p>
+  <button class="light" id="btnAgain">↻ Nochmal</button> <button id="btnNext">Nächste Lektion ▶</button> <button class="light" id="btnMenu">Übersicht</button>
+ </section>
+
+ <!-- PRINT fallback -->
+ <div id="printArea"></div>
+</div>
+
+<script>
+// ---------- Tastatur (QWERTZ) & Finger ----------
+const FINGER={ // key -> finger id
+ '1':'kl','q':'kl','a':'kl','y':'kl','<':'kl',
+ '2':'rl','w':'rl','s':'rl','x':'rl',
+ '3':'ml','e':'ml','d':'ml','c':'ml',
+ '4':'zl','5':'zl','r':'zl','t':'zl','f':'zl','g':'zl','v':'zl','b':'zl',
+ '6':'zr','7':'zr','z':'zr','u':'zr','h':'zr','j':'zr','n':'zr','m':'zr',
+ '8':'mr','i':'mr','k':'mr',',':'mr',
+ '9':'rr','o':'rr','l':'rr','.':'rr',
+ '0':'kr','p':'kr','ö':'kr','-':'kr','ü':'kr','ä':'kr','ß':'kr',
+ ' ':'dm'};
+const FNAME={kl:'linker kleiner Finger',rl:'linker Ringfinger',ml:'linker Mittelfinger',zl:'linker Zeigefinger',
+ zr:'rechter Zeigefinger',mr:'rechter Mittelfinger',rr:'rechter Ringfinger',kr:'rechter kleiner Finger',dm:'Daumen'};
+const ROWS=[
+ {off:0,keys:'1234567890ß'},
+ {off:30,keys:'qwertzuiopü'},
+ {off:42,keys:'asdfghjklöä'},
+ {off:18,keys:'<yxcvbnm,.-'}];
+
+function buildKb(el,active,next){
+ el.innerHTML='';
+ ROWS.forEach(r=>{
+  const row=document.createElement('div'); row.className='row'; row.style.paddingLeft=r.off+'px';
+  [...r.keys].forEach(k=>{
+   const d=document.createElement('div'); d.className='key'; d.textContent=k; d.dataset.k=k;
+   d.style.background=`var(--${FINGER[k]})`;
+   if(active.includes(k)) d.classList.add('active');
+   if(k==='f'||k==='j') d.classList.add('bump');
+   row.appendChild(d);
+  });
+  el.appendChild(row);
+ });
+ const row=document.createElement('div'); row.className='row'; row.style.paddingLeft='190px';
+ const sp=document.createElement('div'); sp.className='key active'; sp.dataset.k=' '; sp.textContent='Leertaste';
+ sp.style.flex='0 0 330px'; sp.style.background='var(--dm)'; row.appendChild(sp); el.appendChild(row);
+ if(next) highlight(el,next);
+}
+function highlight(el,k){
+ el.querySelectorAll('.key.next').forEach(x=>x.classList.remove('next'));
+ const t=el.querySelector(`.key[data-k="${CSS.escape(k)}"]`); if(t) t.classList.add('next');
+}
+
+// ---------- Lektionen ----------
+const L=[
+ {keys:'f j',emo:'🏠',title:'Die Huckel-Häuser',active:'fj',
+  story:['Auf den Tasten <b>f</b> und <b>j</b> sind zwei kleine <b>Huckel</b>. Fühl mal mit dem Finger!',
+         'Dort wohnen die beiden Zeigefinger: <b>Fritz</b> (links, auf f) und <b>Jule</b> (rechts, auf j). Sie finden ihr Zuhause sogar mit geschlossenen Augen – sie tasten einfach nach dem Huckel.'],
+  merk:'Fritz wohnt auf f, Jule wohnt auf j. Immer zurück nach Hause!',
+  lines:['fff jjj fff jjj','fj fj fj jf jf jf','ffj jjf fjf jfj','fjjf jffj fjfj jfjf']},
+ {keys:'d k',emo:'🐉',title:'Drache und König',active:'dkfj',
+  story:['Gleich neben den Huckel-Häusern wohnen die längsten Finger: die Mittelfinger.',
+         'Links auf <b>d</b> wohnt ein <b>Drache</b>, rechts auf <b>k</b> wohnt ein <b>König</b>. Drache und König sind Nachbarn von Fritz und Jule und passen gut auf sie auf.'],
+  merk:'d wie Drache (links), k wie König (rechts) – die Mittelfinger.',
+  lines:['ddd kkk ddd kkk','dk dk kd kd','fdk jkd dfj kjf','dkfj fjdk kdjf djfk']},
+ {keys:'s l',emo:'🌞',title:'Sonne und Luna',active:'sldkfj',
+  story:['Die Ringfinger wohnen ein Haus weiter außen.',
+         'Links auf <b>s</b> scheint die <b>Sonne</b>, rechts auf <b>l</b> leuchtet <b>Luna</b>, der Mond. Tag links, Nacht rechts!'],
+  merk:'s wie Sonne, l wie Luna – die Ringfinger.',
+  lines:['sss lll sss lll','sl ls sl ls','sdf lkj fds jkl','sls lsl dsl kls']},
+ {keys:'a ö',emo:'📚',title:'Die Buchstützen',active:'aölskdjf',
+  story:['Ganz außen sitzen die kleinen Finger auf <b>a</b> und <b>ö</b>.',
+         'Sie sind wie zwei <b>Buchstützen</b> im Regal: Sie halten die ganze Reihe zusammen, damit nichts umfällt. Links die <b>A</b>meise, rechts der <b>Ö</b>lwurm.'],
+  merk:'Ameise auf a, Ölwurm auf ö – die kleinen Finger halten alles zusammen.',
+  lines:['aaa ööö aaa ööö','aö öa aö öa','asdf jklö asdf jklö','fadö jösa lakö sjdk']},
+ {keys:'asdf jklö ␣',emo:'👍',title:'Die ganze Familie',active:'asdfjklö ',
+  story:['Jetzt sind alle zu Hause: <b>a s d f</b> links und <b>j k l ö</b> rechts. Das ist die <b>Grundreihe</b>.',
+         'Und die <b>Daumen</b>? Die liegen ganz entspannt auf der <b>Leertaste</b> und machen Platz zwischen den Wörtern – wie ein Sprungbrett.'],
+  merk:'Grundreihe: a s d f – j k l ö. Daumen auf die Leertaste.',
+  lines:['ja da das als','lass das all das','falls das ja','kajak salsa lass das']},
+ {keys:'g h',emo:'🌳',title:'Garten und Haus',active:'asdfghjklö ',
+  story:['Fritz und Jule machen einen kleinen Ausflug zur Mitte.',
+         'Fritz (linker Zeigefinger) läuft von f einen Schritt nach rechts in den <b>G</b>arten. Jule (rechter Zeigefinger) läuft von j einen Schritt nach links ins <b>H</b>aus. Danach gehen beide sofort zurück auf ihre Huckel!'],
+  merk:'g = Garten (Fritz), h = Haus (Jule) – und wieder zurück nach Hause.',
+  lines:['fgf jhj fgf jhj','gh hg gh hg','gas glas hals lag','sag ja lag das glas']},
+ {keys:'e i',emo:'🥚',title:'Ei und Igel',active:'asdfghjklöei ',
+  story:['Der Drache und der König schauen nach oben.',
+         'Der Drache (linker Mittelfinger) streckt sich von d nach oben und findet ein <b>E</b>i. Der König (rechter Mittelfinger) streckt sich von k nach oben und findet einen <b>I</b>gel.'],
+  merk:'Von d hoch zum e (Ei), von k hoch zum i (Igel).',
+  lines:['ded kik ded kik','ei ie ei ie','die sie eis ei','hase idee hilfe','fee see dies gelee']},
+ {keys:'r u',emo:'🚀',title:'Rakete und Ufo',active:'asdfghjklöeiru ',
+  story:['Jetzt fliegen Fritz und Jule in den Himmel!',
+         'Fritz springt von f schräg nach oben in die <b>R</b>akete (r). Jule springt von j schräg nach oben ins <b>U</b>fo (u). Nach dem Flug landen sie natürlich wieder auf ihren Huckeln.'],
+  merk:'f hoch zum r (Rakete), j hoch zum u (Ufo).',
+  lines:['frf juj frf juj','ru ur ru ur','rad ruhe ufer','reis haus heu','erde regal adler gurke']},
+ {keys:'Sätze',emo:'🏆',title:'Das große Finale',active:'asdfghjklöeiru ',
+  story:['Du kennst jetzt die ganze Grundreihe und dazu g, h, e, i, r und u. Damit kannst du schon richtige Sätze schreiben!',
+         'Bleib ruhig, schau auf den Bildschirm und lass die Finger nach jedem Buchstaben nach Hause zurückkehren.'],
+  merk:'Langsam und richtig ist besser als schnell und falsch!',
+  lines:['lisa sah die kuh','die kuh lief auf das gras','die frau sah das reh','der adler sah das ei','lisa rief hilfe']}
+];
+
+// ---------- TEST (wird von der Lehrer-Übersicht ersetzt) ----------
+/*TEST-START*/const TEST={"title":"Tipp-Test","lines":["lisa sah die kuh","das reh lief auf die heide","der adler sah das ei","sag es leise","fred las es ihr"]};/*TEST-END*/
+const TID='test';
+
+// ---------- Speicher ----------
+let state={name:'',klasse:'',res:{},tests:[]};
+try{ const s=JSON.parse(localStorage.getItem('tipptrainer_v1')||'null'); if(s) state=s; }catch(e){}
+if(!state.tests) state.tests=[];
+function save(){ try{ localStorage.setItem('tipptrainer_v1',JSON.stringify(state)); }catch(e){} }
+
+// ---------- Views ----------
+const $=id=>document.getElementById(id);
+function view(v){ ['vStart','vMenu','vStory','vType','vResult'].forEach(x=>$(x).classList.toggle('hidden',x!==v)); mode=v; }
+let mode='vStart', cur=0;
+function stars(acc){ return acc>=95?3:acc>=85?2:1; }
+function starStr(n){ return '★'.repeat(n)+'☆'.repeat(3-n); }
+function setWho(){ $('who').textContent = state.name? `👤 ${state.name}${state.klasse?' · '+state.klasse:''}` : ''; }
+
+function menu(){
+ setWho(); const list=$('lessonList'); list.innerHTML='';
+ L.forEach((l,i)=>{
+  const r=state.res[i]; const d=document.createElement('div'); d.className='lesson';
+  d.innerHTML=`<div class="nr">LEKTION ${i+1}</div><div class="keys">${l.keys}</div><div class="t">${l.title}</div>
+   <div class="stars">${r?'<span style="color:#f08c00">'+starStr(r.stars)+'</span>':''}</div><div class="emo">${l.emo}</div>`;
+  d.onclick=()=>story(i); list.appendChild(d);
+ });
+ const t=document.createElement('div'); t.className='lesson test';
+ const last=state.tests.filter(x=>x.textId===testId()).length;
+ t.innerHTML=`<div class="nr">TEST</div><div class="keys">📝</div><div class="t">${TEST.title}</div>
+  <div class="stars" style="font-size:16px">${last?'✔ geschrieben':''}</div>`;
+ t.onclick=testIntro; list.appendChild(t);
+ view('vMenu');
+}
+function testId(){ let h=0; const s=TEST.lines.join('|'); for(let i=0;i<s.length;i++){h=(h*31+s.charCodeAt(i))|0;} return 't'+(h>>>0).toString(36); }
+function testIntro(){
+ cur=TID; $('stTitle').textContent='📝 '+TEST.title; $('stEmo').textContent='📝';
+ $('stText').innerHTML='<p>Jetzt zeigst du, was du kannst! Tippe den Text so genau wie möglich ab.</p>';
+ $('stMerk').textContent='💡 Genau ist wichtiger als schnell!';
+ const n=TEST.lines.join('').length;
+ $('stTest').innerHTML=`<li>Es gibt <b>keine Hilfe</b>: Die Tastatur und die Finger werden nicht angezeigt.</li>
+  <li>Jeder falsche Buchstabe ist ein <b>Fehler</b> und bleibt rot. Du kannst nicht zurück.</li>
+  <li>Der Test hat ${TEST.lines.length} Zeilen (${n} Zeichen).</li>`;
+ $('stTest').classList.remove('hidden'); $('kbStory').innerHTML='';
+ view('vStory');
+}
+function story(i){
+ $('stTest').classList.add('hidden');
+ cur=i; const l=L[i];
+ $('stTitle').textContent=`Lektion ${i+1}: ${l.title}`; $('stEmo').textContent=l.emo;
+ $('stText').innerHTML=l.story.map(p=>`<p>${p}</p>`).join(''); $('stMerk').textContent='💡 '+l.merk;
+ buildKb($('kbStory'),l.active,null);
+ // markiere neue Tasten
+ l.keys.replace(/[^a-zäöü]/g,'').split('').forEach(k=>{const t=$('kbStory').querySelector(`.key[data-k="${k}"]`); if(t) t.classList.add('next');});
+ view('vStory');
+}
+
+// ---------- Tippen ----------
+let lineIdx=0,pos=0,errs=0,correct=0,errAt=false,tStart=0,tTotal=0,lineStart=0,totalErr=0,totalCorrect=0,typed=[];
+function curLines(){ return cur===TID?TEST.lines:L[cur].lines; }
+function startLesson(){
+ lineIdx=0; totalErr=0; totalCorrect=0; tTotal=0;
+ const isT=cur===TID;
+ ['kb','legend','finger'].forEach(x=>$(x).classList.toggle('hidden',isT));
+ $('btnBack2').classList.toggle('hidden',isT);
+ if(isT){ $('tyTitle').textContent='📝 '+TEST.title; view('vType'); startLine(); return; }
+ $('tyTitle').textContent=`Lektion ${cur+1}: ${L[cur].title}`;
+ $('legend').innerHTML=Object.keys(FNAME).map(f=>`<span style="background:var(--${f})">${FNAME[f]}</span>`).join('');
+ buildKb($('kb'),L[cur].active,null);
+ view('vType'); startLine();
+}
+function startLine(){ pos=0; lineStart=0; typed=[]; errAt=false; renderLine(); }
+function renderLine(){
+ const txt=curLines()[lineIdx];
+ $('line').innerHTML=[...txt].map((c,i)=>{
+  let cl='ch '+(i<pos?(typed[i]?'err':'done'):i===pos?'cur':'todo');
+  if(c===' ') cl+=' space';
+  return `<span class="${cl}">${c===' '?'␣':c}</span>`;
+ }).join('');
+ $('dots').innerHTML=curLines().map((_,i)=>`<span class="${i<lineIdx?'ok':i===lineIdx?'now':''}"></span>`).join('');
+ const nk=txt[pos]; if(nk!==undefined && cur!==TID){
+  highlight($('kb'),nk); const f=FINGER[nk];
+  $('finger').textContent='👉 '+FNAME[f]; $('finger').style.background=`var(--${f})`;
+ }
+ const acc = (totalCorrect+totalErr)? Math.round(100*totalCorrect/(totalCorrect+totalErr)) : 100;
+ $('live').textContent= cur===TID? `Zeile ${lineIdx+1} von ${curLines().length}` : `Fehler: ${totalErr} · ${acc} %`;
+}
+document.addEventListener('keydown',e=>{
+ if(mode==='vStory' && e.key==='Enter'){ e.preventDefault(); startLesson(); return; }
+ if(mode==='vType' && e.key==='Backspace'){ e.preventDefault(); return; }
+ if(mode==='vResult' && e.key==='Enter'){ e.preventDefault(); nextLesson(); return; }
+ if(mode!=='vType') return;
+ if(e.ctrlKey||e.altKey||e.metaKey) return;
+ if(e.key.length!==1) return;
+ e.preventDefault();
+ const txt=curLines()[lineIdx]; const want=txt[pos]; const got=e.key.toLowerCase();
+ if(!lineStart) lineStart=performance.now();
+ const kEl=$('kb').querySelector(`.key[data-k="${CSS.escape(got)}"]`);
+ if(kEl){ kEl.classList.add('press'); setTimeout(()=>kEl.classList.remove('press'),120); }
+ if(cur===TID){ // Testmodus: jeder Anschlag zählt, weiter auch bei Fehler
+  const bad=got!==want; typed[pos]=bad; if(bad) totalErr++; else totalCorrect++; pos++;
+  if(pos>=txt.length){
+   tTotal+=performance.now()-lineStart; lineIdx++;
+   if(lineIdx>=curLines().length){ finishTest(); return; }
+   startLine(); return;
+  }
+  renderLine(); return;
+ }
+ if(got===want){
+  typed[pos]=errAt; errAt=false; pos++; totalCorrect++;
+  if(pos>=txt.length){
+   tTotal+=performance.now()-lineStart; lineIdx++;
+   if(lineIdx>=L[cur].lines.length){ finish(); return; }
+   startLine(); return;
+  }
+ } else {
+  totalErr++; errAt=true; $('line').classList.remove('shake'); void $('line').offsetWidth; $('line').classList.add('shake');
+ }
+ renderLine();
+});
+function finish(){
+ const min=tTotal/60000; const apm=Math.round(totalCorrect/Math.max(min,0.01));
+ const acc=Math.round(100*totalCorrect/(totalCorrect+totalErr)); const st=stars(acc);
+ const secs=Math.round(tTotal/1000);
+ resetResultLabels();
+ const r={apm,acc,err:totalErr,secs,stars:st,date:new Date().toLocaleDateString('de-DE')};
+ const old=state.res[cur];
+ if(!old || st>old.stars || (st===old.stars && apm>old.apm)) state.res[cur]=r;
+ save();
+ $('reTitle').textContent=`Lektion ${cur+1} geschafft! ${L[cur].emo}`;
+ $('reStars').innerHTML=`<span style="color:#f08c00">${starStr(st)}</span>`;
+ $('reApm').textContent=apm; $('reAcc').textContent=acc+' %'; $('reErr').textContent=totalErr;
+ $('reTime').textContent=Math.floor(secs/60)+':'+String(secs%60).padStart(2,'0');
+ $('reMsg').textContent= st===3?'Super! Fast fehlerfrei – weiter so!': st===2?'Gut gemacht! Mit etwas Übung schaffst du 3 Sterne.':'Probier es nochmal ganz in Ruhe. Langsam und richtig ist besser als schnell!';
+ $('btnNext').classList.toggle('hidden',cur>=L.length-1);
+ view('vResult');
+}
+function finishTest(){
+ const chars=TEST.lines.join('').length; const secs=Math.round(tTotal/1000);
+ const apm=Math.round(totalCorrect/Math.max(tTotal/60000,0.01));
+ const quote=Math.round(1000*totalErr/chars)/10;
+ const r={textId:testId(),title:TEST.title,chars,err:totalErr,quote,apm,secs,date:new Date().toISOString(),versuch:state.tests.filter(x=>x.textId===testId()).length+1};
+ state.tests.push(r); save();
+ $('reTitle').textContent='📝 Test geschafft!';
+ $('reStars').innerHTML='';
+ $('reApm').textContent=apm; $('reAcc').textContent=quote.toString().replace('.',',')+' %';
+ $('reAcc').previousSibling.textContent='Fehlerquote';
+ $('reErr').textContent=totalErr+' / '+chars;
+ $('reTime').textContent=Math.floor(secs/60)+':'+String(secs%60).padStart(2,'0');
+ $('reMsg').innerHTML='Klicke jetzt in der Übersicht auf <b>📤 Abgeben</b>!';
+ $('btnNext').classList.add('hidden'); $('btnAgain').classList.add('hidden');
+ view('vResult');
+}
+function resetResultLabels(){ $('reAcc').previousSibling.textContent='Genauigkeit'; $('btnAgain').classList.remove('hidden'); }
+function nextLesson(){ if(cur!==TID && cur<L.length-1) story(cur+1); else menu(); }
+
+// ---------- PDF ----------
+function makePdf(){
+ const done=Object.keys(state.res).length;
+ if(!done && !state.tests.length){ $('pdfMsg').textContent='Du hast noch keine Lektion geschafft.'; return; }
+ const date=new Date().toLocaleDateString('de-DE');
+ if(window.jspdf){
+  const {jsPDF}=window.jspdf; const doc=new jsPDF({unit:'mm',format:'a4'});
+  doc.setFillColor(249,194,60); doc.rect(0,0,210,32,'F');
+  doc.setFont('helvetica','bold'); doc.setFontSize(24); doc.text('Tipp-Trainer: Die Grundreihe',15,20);
+  doc.setFontSize(13); doc.setFont('helvetica','normal');
+  doc.text(`Name: ${state.name||'-'}`,15,44); doc.text(`Klasse: ${state.klasse||'-'}`,110,44); doc.text(`Datum: ${date}`,155,44);
+  let y=58; const cols=[15,24,104,129,152,168,182];
+  doc.setFont('helvetica','bold'); doc.setFontSize(11); doc.setFillColor(255,227,138); doc.rect(13,y-6,184,9,'F');
+  ['Nr.','Lektion','Anschl./Min.','Genauigk.','Fehler','Zeit','Sterne'].forEach((h,i)=>doc.text(h,cols[i],y));
+  doc.setFont('helvetica','normal'); doc.setFontSize(12); y+=9;
+  let sumStars=0,accSum=0,apmSum=0;
+  L.forEach((l,i)=>{
+   const r=state.res[i];
+   doc.text(String(i+1),cols[0],y); doc.text(`${l.title} (${i===4?'Grundreihe':l.keys})`,cols[1],y);
+   if(r){ doc.text(String(r.apm),cols[2],y); doc.text(r.acc+' %',cols[3],y); doc.text(String(r.err),cols[4],y);
+    doc.text(Math.floor(r.secs/60)+':'+String(r.secs%60).padStart(2,'0'),cols[5],y);
+    // Sterne zeichnen
+    for(let s=0;s<3;s++){ star(doc,cols[6]+2+s*5.5,y-1.5,2.2,s<r.stars); }
+    sumStars+=r.stars; accSum+=r.acc; apmSum+=r.apm;
+   } else { doc.setTextColor(150); doc.text('noch nicht geschafft',cols[2],y); doc.setTextColor(0); }
+   doc.setDrawColor(200); doc.line(13,y+3,197,y+3); y+=10;
+  });
+  y+=6; doc.setFontSize(13); doc.setFont('helvetica','bold');
+  doc.text(`Geschafft: ${done} von ${L.length} Lektionen   ·   Sterne: ${sumStars} von ${L.length*3}`,15,y); y+=8;
+  doc.setFont('helvetica','normal');
+  if(done) doc.text(`Durchschnitt: ${Math.round(apmSum/done)} Anschläge pro Minute, ${Math.round(accSum/done)} % Genauigkeit`,15,y);
+  const tt=state.tests.filter(x=>x.textId===testId());
+  if(tt.length){ const f=tt[0]; y+=12; doc.setFont('helvetica','bold'); doc.text(`Test "${TEST.title}"`,15,y); doc.setFont('helvetica','normal'); y+=7;
+   doc.text(`${f.err} Fehler bei ${f.chars} Zeichen  =  Fehlerquote ${String(f.quote).replace('.',',')} %   ·   ${f.apm} Anschläge pro Minute`,15,y); }
+  y+=18; doc.setFontSize(11); doc.setTextColor(90);
+  doc.text('Sterne: 3 = mind. 95 % richtig · 2 = mind. 85 % richtig · 1 = geschafft',15,y);
+  y+=20; doc.setTextColor(0); doc.setFontSize(12);
+  doc.line(15,y,85,y); doc.line(120,y,190,y); doc.text('Unterschrift Schüler/in',15,y+5); doc.text('Unterschrift Lehrkraft',120,y+5);
+  const fn=`Tipptrainer_${(state.name||'Ergebnis').replace(/[^A-Za-zÄÖÜäöüß0-9]+/g,'_')}.pdf`;
+  try{ doc.save(fn); $('pdfMsg').textContent='PDF wurde gespeichert: '+fn; }
+  catch(e){ printFallback(date); }
+ } else printFallback(date);
+}
+function star(doc,cx,cy,r,filled){
+ const pts=[]; for(let i=0;i<10;i++){ const a=-Math.PI/2+i*Math.PI/5; const rr=i%2?r*0.45:r; pts.push([cx+rr*Math.cos(a),cy+rr*Math.sin(a)]); }
+ const lines=pts.slice(1).map((p,i)=>[p[0]-pts[i][0],p[1]-pts[i][1]]);
+ doc.setDrawColor(240,140,0); doc.setFillColor(filled?240:255,filled?140:255,filled?0:255);
+ doc.lines(lines,pts[0][0],pts[0][1],[1,1],'FD',true);
+}
+function printFallback(date){
+ const rows=L.map((l,i)=>{const r=state.res[i]; return `<tr><td>${i+1}</td><td>${l.title} (${l.keys})</td>${r?`<td>${r.apm}</td><td>${r.acc} %</td><td>${r.err}</td><td>${starStr(r.stars)}</td>`:'<td colspan="4">noch nicht geschafft</td>'}</tr>`;}).join('');
+ $('printArea').innerHTML=`<h1>TIPP-TRAINER</h1><p>Name: <b>${state.name}</b> &nbsp; Klasse: <b>${state.klasse}</b> &nbsp; Datum: ${date}</p>
+  <table><tr><th>Nr.</th><th>Lektion</th><th>Anschl./Min</th><th>Genauigkeit</th><th>Fehler</th><th>Sterne</th></tr>${rows}</table>`;
+ $('pdfMsg').textContent='Im Druckfenster „Als PDF speichern“ auswählen.';
+ try{ window.print(); }catch(e){}
+}
+
+// ---------- Buttons ----------
+$('btnStart').onclick=()=>{ const n=$('inName').value.trim(); if(!n){ $('inName').focus(); $('inName').style.background='#ffe3e3'; return; }
+ if(state.name && state.name!==n){ state.res={}; state.tests=[]; } state.name=n; state.klasse=$('inKlasse').value.trim(); save(); menu(); };
+$('inName').addEventListener('keydown',e=>{ if(e.key==='Enter') $('btnStart').click(); });
+$('inKlasse').addEventListener('keydown',e=>{ if(e.key==='Enter') $('btnStart').click(); });
+$('btnChange').onclick=()=>{ $('inName').value=state.name; $('inKlasse').value=state.klasse; setWho(); view('vStart'); };
+$('btnPdf').onclick=makePdf;
+$('btnAbgabe').onclick=()=>{
+ const data={app:'tipptrainer',version:1,name:state.name,klasse:state.klasse,abgegeben:new Date().toISOString(),
+  lektionen:L.map((l,i)=>Object.assign({nr:i+1,titel:l.title},state.res[i]||{})),
+  test:state.tests.filter(x=>x.textId===testId()), testTitel:TEST.title, testId:testId()};
+ const fn=`Tipptrainer_${(state.klasse||'').replace(/[^A-Za-z0-9]+/g,'')}_${state.name.replace(/[^A-Za-zÄÖÜäöüß0-9]+/g,'_')}.json`;
+ try{
+  const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([JSON.stringify(data,null,1)],{type:'application/json'}));
+  a.download=fn; document.body.appendChild(a); a.click(); a.remove();
+  $('pdfMsg').innerHTML=`✅ Datei <b>${fn}</b> wurde gespeichert (meist im Ordner „Downloads“). Lege sie in den Abgabe-Ordner.`;
+ }catch(e){ $('pdfMsg').textContent='Speichern hat nicht geklappt – bitte Lehrkraft fragen.'; }
+};
+$('btnGo').onclick=startLesson;
+$('btnBack1').onclick=menu; $('btnBack2').onclick=menu; $('btnMenu').onclick=menu;
+$('btnAgain').onclick=()=>cur===TID?testIntro():story(cur); $('btnNext').onclick=nextLesson;
+
+if(state.name){ $('inName').value=state.name; $('inKlasse').value=state.klasse; menu(); } else view('vStart');
+</script>
+</body>
+</html>
